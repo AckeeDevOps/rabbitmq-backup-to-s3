@@ -8,4 +8,7 @@ COPY s3cfg /root/.s3cfg
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
+
+VOLUME /var/lib/rabbitmq/
+
 CMD ["cron","-f"]
