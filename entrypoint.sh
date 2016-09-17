@@ -3,10 +3,11 @@ set -eo pipefail
 
 # verify variables
 if [ -z "$S3_ACCESS_KEY" -o -z "$S3_SECRET_KEY" -o -z "$S3_URL" -o -z "$RABBITMQ_ERLANG_COOKIE" -o -z "$RABBITMQ_HOSTNAME" ]; then
-	echo >&2 'Backup information is not complete. You need to specify S3_ACCESS_KEY, S3_SECRET_KEY, S3_URL, RABBITMQ_HOSTNAME, RABBITMQ_ERLAND_COOKIE. No backups, no fun.'
+	echo >&2 'Backup information is not complete. You need to specify S3_ACCESS_KEY, S3_SECRET_KEY, S3_URL, RABBITMQ_HOSTNAME, RABBITMQ_ERLANG_COOKIE. No backups, no fun.'
 	exit 1
 fi
-
+echo $RABBITMQ_ERLANG_COOKIE >> /var/lib/rabbitmq/.erlang.cookie
+chmod 400 /var/lib/rabbitmq/.erlang.cookie
 CFG_FILE=/root/.s3cfg
 
 # set s3 config
@@ -26,12 +27,12 @@ rabbitmqctl -n $REMOTE list_users >/dev/null
 echo "Success."
 
 # add a cron job
-echo "$CRON_SCHEDULE root rm -rf /tmp/dump &&\
+echo "$CRON_SCHEDULE root rm -rf /tmp/all.tgz &&\
   rabbitmqctl -n $REMOTE stop_app &&\
-  tar -czf all.tgz /var/lib/rabbitmq/ &&\
+  tar czf /tmp/all.tgz /var/lib/rabbitmq/ &&\
   rabbitmqctl -n $REMOTE start_app &&\
-  s3cmd -c $CFG_FILE sync /tmp/dump s3://$S3_URL/ &&\
-  rm -rf /tmp/dump" >> /etc/crontab
+  s3cmd -c $CFG_FILE sync /tmp/ s3://$S3_URL/ &&\
+  rm -rf /tmp/all.tgz" >> /etc/crontab
 crontab /etc/crontab
 
 exec "$@"
