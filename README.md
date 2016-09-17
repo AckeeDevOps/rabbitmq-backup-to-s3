@@ -3,9 +3,8 @@
 This image provides a cron daemon that runs daily backups from rabbitmq to Amazon S3.
 
 Following ENV variables must be specified:
- - `MONGO_URL` contains the connection string for mongodump command line client (option -h)
- - `MONGO_USER` contains the username
- - `MONGO_PASSWORD` password of a user who has access to all dbs
+ - `RABBITMQ_ERLANG_COOKIE` contains the secret connection string for rabbitmqctl remote management (both RabbitMQ containers should have the same cookie string set)
+ - `RABBITMQ_HOSTNAME` contains the hostname (also referred as "Node name") string for rabbitmqctl remote management (option -n)
  - `S3_URL` contains address in S3 where to store backups
   - `bucket-name/directory`
  - `S3_ACCESS_KEY`
